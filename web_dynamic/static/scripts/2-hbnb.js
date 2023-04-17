@@ -1,28 +1,24 @@
-$(document).ready(function () {
-    // Send GET request to API
-    fetch('http://0.0.0.0:5001/api/v1/status/')
-      .then(response => {
-        // Check if response is OK
-        if (response.ok) {
-          // Add "available" class to div#api_status
-          document.querySelector('#api_status').classList.add('available');
-        } else {
-          // Remove "available" class from div#api_status
-          document.querySelector('#api_status').classList.remove('available');
-        }
-      })
-      .catch(error => console.error(error));
-  
-    // Show/Hide amenities
-    const amenitiesChecked = {};
-    $('input:checkbox').change(function () {
-      if ($(this).is(':checked')) {
-        amenitiesChecked[$(this).data('id')] = $(this).data('name');
+$('document').ready(function () {
+    const url = 'http://' + window.location.hostname + ':5001/api/v1/status/';
+    $.get(url, function (response) {
+      if (response.status === 'OK') {
+        $('DIV#api_status').addClass('available');
       } else {
-        delete amenitiesChecked[$(this).data('id')];
+        $('DIV#api_status').removeClass('available');
       }
-      const amenitiesList = Object.values(amenitiesChecked).join(', ');
-      $('.amenities h4').text(amenitiesList);
+    });
+  
+    let amenities = {};
+    $('INPUT[type="checkbox"]').change(function () {
+      if ($(this).is(':checked')) {
+        amenities[$(this).attr('data-id')] = $(this).attr('data-name');
+      } else {
+        delete amenities[$(this).attr('data-id')];
+      }
+      if (Object.values(amenities).length === 0) {
+        $('.amenities H4').html('&nbsp;');
+      } else {
+        $('.amenities H4').text(Object.values(amenities).join(', '));
+      }
     });
   });
-  
