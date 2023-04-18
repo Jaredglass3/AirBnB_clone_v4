@@ -1,7 +1,7 @@
 $('document').ready(function () {
   const api = 'http://' + window.location.hostname;
 
-  $.get(api + 'http://0.0.0.0:5001:/api/v1/status/', function (response) {
+  $.get(api + ':5001/api/v1/status/', function (response) {
     if (response.status === 'OK') {
       $('DIV#api_status').addClass('available');
     } else {
@@ -10,7 +10,7 @@ $('document').ready(function () {
   });
 
   $.ajax({
-    url: api + 'http://0.0.0.0:5001/api/v1/places_search/',
+    url: api + ':5001/api/v1/places_search',
     type: 'POST',
     data: '{}',
     contentType: 'application/json',
