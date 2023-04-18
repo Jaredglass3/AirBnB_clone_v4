@@ -10,7 +10,7 @@ $('document').ready(function () {
     });
   
     $.ajax({
-      url: api + ':5001/api/v1/places_search/',
+      url: api + 'http://0.0.0.0:5001/api/v1/places_search/',
       type: 'POST',
       data: '{}',
       contentType: 'application/json',
