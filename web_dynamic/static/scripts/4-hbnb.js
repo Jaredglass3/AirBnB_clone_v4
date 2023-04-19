@@ -1,79 +1,50 @@
-$('document').ready(function () {
-  const api = 'http://' + window.location.hostname;
+$(document).ready(function () {
+  const amenityIDs = {};
+  const apiurl = 'http://' + window.location.hostname;
 
-  $.get(api + ':5001/api/v1/status/', function (response) {
-    if (response.status === 'OK') {
-      $('DIV#api_status').addClass('available');
-    } else {
-      $('DIV#api_status').removeClass('available');
-    }
-  });
-
-  $.ajax({
-    url: api + ':5001/api/v1/places_search',
-    type: 'POST',
-    data: '{}',
-    contentType: 'application/json',
-    dataType: 'json',
-    success: appendPlaces
-  });
-
-  let amenities = {};
-  $('INPUT[type="checkbox"]').change(function () {
-    if ($(this).is(':checked')) {
-      amenities[$(this).attr('data-id')] = $(this).attr('data-name');
-    } else {
-      delete amenities[$(this).attr('data-id')];
-    }
-    if (Object.values(amenities).length === 0) {
-      $('.amenities H4').html('&nbsp;');
-    } else {
-      $('.amenities H4').text(Object.values(amenities).join(', '));
-    }
-  });
-
-  $('BUTTON').click(function () {
+  function updateAvailablePlaces() {
+    $('section.places').empty();
     $.ajax({
-      url: api + 'http://0.0.0.0:5001/api/v1/places_search/',
       type: 'POST',
-      data: JSON.stringify({ 'amenities': Object.keys(amenities) }),
       contentType: 'application/json',
-      dataType: 'json',
-      success: appendPlaces
+      url: apiurl + ':5001/api/v1/places_search/',
+      data: JSON.stringify({ amenities: Object.values(amenityIDs) }),
+      success: function (data) {
+        $.each(data, function (index, place) {
+          $('section.places').append('<article><div class="title_box"><h2>' + place.name + '</h2><div class="price_by_night">$' + place.price_by_night + '</div></div><div class="information"><div class="max_guest">' + place.max_guest + ' Guest(s)</div><div class="number_rooms">' + place.number_rooms + ' Bedroom(s)</div><div class="number_bathrooms">' + place.number_bathrooms + ' Bathroom(s)</div></div><div class="description">' + place.description + '</div></article>');
+        });
+      },
+      dataType: 'json'
     });
+  }
+
+  $('input[type="checkbox"]').click(function () {
+    if ($(this).is(':checked')) {
+      amenityIDs[$(this).attr('data-name')] = $(this).attr('data-id');
+    } else {
+      delete amenityIDs[$(this).attr('data-name')];
+    }
+    const list = [];
+    $.each(amenityIDs, function (index, place) {
+      list.push(index);
+    });
+    if (list.length === 0) {
+      $('.amenities h4').html('&nbsp');
+    } else {
+      $('.amenities h4').text(list.join(', '));
+    }
+    updateAvailablePlaces();
+  });
+
+  $.get(apiurl + ':5001/api/v1/status/', function (data) {
+    if (data.status === 'OK') {
+      $('div#api_status').addClass('available');
+    } else {
+      $('div#api_status').removeClass('available');
+    }
+  });
+
+  $('button').click(function () {
+    updateAvailablePlaces();
   });
 });
-
-function appendPlaces (data) {
-  $('SECTION.places').empty();
-  $('SECTION.places').append(data.map(place => {
-    return `<ARTICLE>
-              <DIV class="title">
-                <H2>${place.name}</H2>
-                  <DIV class="price_by_night">
-                    ${place.price_by_night}
-                  </DIV>
-                </DIV>
-                <DIV class="information">
-                  <DIV class="max_guest">
-                    <I class="fa fa-users fa-3x" aria-hidden="true"></I>
-                    </BR>
-                    ${place.max_guest} Guests
-                  </DIV>
-                  <DIV class="number_rooms">
-                    <I class="fa fa-bed fa-3x" aria-hidden="true"></I>
-                    </BR>
-                    ${place.number_rooms} Bedrooms
-                  </DIV>
-                  <DIV class="number_bathrooms">
-                    <I class="fa fa-bath fa-3x" aria-hidden="true"></I>
-                    </BR>
-                    ${place.number_bathrooms} Bathrooms
-                  </DIV>
-                </DIV>
-                <DIV class="description">
-                  ${place.description}
-                </DIV>
-              </ARTICLE>`;
-  }));
-}
